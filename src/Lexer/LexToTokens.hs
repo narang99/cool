@@ -1,4 +1,4 @@
-module Lexer.LexToTokes
+module Lexer.LexToTokens
   ( lexFileToTokens,
     lexToTokens,
     LexStructure (..),
@@ -15,7 +15,7 @@ data LexStructure = LexStructure
   { definitions :: [Definition],
     rules :: [Rule],
     subroutine :: [SubRoutine]
-  }
+  } deriving (Show)
 
 lexFileToTokens :: FilePath -> IO (Either String LexStructure)
 lexFileToTokens path = do

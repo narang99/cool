@@ -49,27 +49,29 @@ parseRule [] = (Left "Error: Cant find rule, empty line", [])
 -- if first column not empty: patter start
 -- subsequent lines as long as columns are non empty they are treated as code
 parseRule (l : ls) = case TL.uncons l of
-  Nothing -> (Left "Error: cant have an initial empty space in rule\n", [])
-  Just (_, _) ->
-    let (firstWord, rest) = TL.break C.isSpace l
-        (restOfCode, nextLines) = getUntilLineHasCode ls
-        pat' = parsePattern firstWord
-        codeForRule =
-          LexToken
-            { lexeme = rest `TL.append` restOfCode,
-              token = Code
-            }
-     in case pat' of
-          Left str -> (Left str, nextLines)
-          Right pat ->
-            ( Right
-                ( Rule
-                    { pattern = pat,
-                      code = codeForRule
-                    }
-                ),
-              nextLines
-            )
+  Nothing -> (Left "Error: cant have an empty line as rule\n", [])
+  Just (c, _) -> if C.isSpace c 
+    then (Left "Error: cant have a rule starting with space", [])
+    else 
+      let (firstWord, rest) = TL.break C.isSpace l
+          (restOfCode, nextLines) = getUntilLineHasCode ls
+          pat' = parsePattern firstWord
+          codeForRule =
+            LexToken
+              { lexeme = rest `TL.append` restOfCode,
+                token = Code
+              }
+      in case pat' of
+            Left str -> (Left str, nextLines)
+            Right pat ->
+              ( Right
+                  ( Rule
+                      { pattern = pat,
+                        code = codeForRule
+                      }
+                  ),
+                nextLines
+              )
     where
       getUntilLineHasCode :: [TL.Text] -> (TL.Text, [TL.Text])
       getUntilLineHasCode [] = (TL.empty, [])
